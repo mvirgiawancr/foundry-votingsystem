@@ -34,7 +34,7 @@ contract HelperConfig is Script {
         // deploy the mocks...
         vm.stopBroadcast();
 
-        _anvilNetworkConfig = NetworkConfig({durationHours: 4, deployerKey: DEFAULT_ANVIL_PRIVATE_KEY});
+        _anvilNetworkConfig = NetworkConfig({durationHours: 1, deployerKey: DEFAULT_ANVIL_PRIVATE_KEY});
     }
 
     function getSepoliaNetworkConfig() internal view returns (NetworkConfig memory _sepoliaNotworkConfig) {

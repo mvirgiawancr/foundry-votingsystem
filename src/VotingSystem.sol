@@ -15,6 +15,7 @@ contract VotingSystem is Ownable {
     error VotingSystem__InvalidCandidateIndex();
     error VotingSystem__VotingClosed();
     error VotingSystem__VotingStillOpen();
+    error VotingSystem__NotOwner();
 
     struct Candidate {
         string name;
@@ -30,12 +31,11 @@ contract VotingSystem is Ownable {
 
     constructor(uint256 _durationHours) Ownable(msg.sender) {
         endTime = block.timestamp + _durationHours * 1 hours;
-        candidateIndex++;
     }
 
     modifier hasNotVoted() {
         if (hasVoted[msg.sender]) {
-            revert VotingSystem__VotingClosed();
+            revert VotingSystem__AlreadyVoted();
         }
         _;
     }
@@ -54,8 +54,8 @@ contract VotingSystem is Ownable {
         _;
     }
 
-    function addCandidate(string memory _name, uint256 _candidateIndex) public onlyOwner {
-        candidates.push(Candidate(_name, _candidateIndex));
+    function addCandidate(string memory _name) public onlyOwner {
+        candidates.push(Candidate(_name, candidateIndex));
         candidatesCount++;
     }
 
@@ -70,12 +70,13 @@ contract VotingSystem is Ownable {
     function endVoting() external onlyOwner {
         if (block.timestamp >= endTime) {
             votingEnded = true;
+        } else {
+            revert VotingSystem__VotingStillOpen();
         }
-        revert VotingSystem__VotingStillOpen();
     }
 
     function getResults() external view votingClosed returns (string[] memory names, uint256[] memory voteCounts) {
-        if (votingEnded) {
+        if (!votingEnded) {
             revert VotingSystem__VotingStillOpen();
         }
         names = new string[](candidatesCount);
